@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cinefila
 
-## Getting Started
+Aplicacion con `Next.js 16`, `React 19` y `Prisma 7` para:
 
-First, run the development server:
+- mostrar una portada con la pelicula del momento
+- explorar el catalogo con busqueda y filtros
+- administrar peliculas desde un panel `Admin`
+- publicar reseñas en modal por cada pelicula
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Credenciales de prueba
+
+- Usuario: `Admin`
+- Contraseña: `Admin`
+
+## Stack
+
+- `Next.js 16 App Router`
+- `Tailwind CSS 4`
+- `Prisma 7`
+- `PostgreSQL` compatible con integraciones Postgres de `Vercel Marketplace`
+
+## Variables de entorno
+
+La app busca la conexion Postgres en este orden:
+
+- `DATABASE_URL`
+- `POSTGRES_URL`
+- `POSTGRES_PRISMA_URL`
+- `POSTGRES_URL_NON_POOLING`
+- credenciales `PG*` de Vercel o con prefijo, por ejemplo `DATABASE_PGHOST`
+
+Si defines tu conexion manualmente, usa:
+
+```env
+DATABASE_URL="postgresql://..."
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Modo local (LocalStorage)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Si quieres probar sin base de datos, crea un archivo `.env.local` con:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+NEXT_PUBLIC_DATA_MODE="local"
+```
 
-## Learn More
+Luego ejecuta `npm run dev`. El catalogo se guarda en localStorage del navegador.
 
-To learn more about Next.js, take a look at the following resources:
+Para volver a usar la base de Vercel, elimina `NEXT_PUBLIC_DATA_MODE` y configura `DATABASE_URL` en el proyecto.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Comandos
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm install
+npm run db:generate
+npm run db:migrate
+npm run db:seed
+npm run dev
+```
 
-## Deploy on Vercel
+## Despliegue en Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Crea una base Postgres desde `Vercel Marketplace`.
+2. Conecta la base al proyecto.
+3. Si Vercel te crea `DATABASE_URL`, no necesitas tocar codigo.
+4. Si te crea `POSTGRES_URL`, `POSTGRES_PRISMA_URL` o variables `PG*`, esta app ya las detecta automaticamente.
+5. Elimina `NEXT_PUBLIC_DATA_MODE` si estaba activo.
+6. Ejecuta `npm run db:deploy` para aplicar migraciones en la base nueva.
+7. Opcionalmente corre `npm run db:seed` para cargar peliculas demo.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Si estas usando una base vieja del proyecto anterior solo para probar, puedes crear las tablas nuevas con `npx prisma db push`. Para una base limpia de Vercel usa migraciones con `npm run db:deploy`.
+
+## Nota
+
+El login de `Admin` es intencionalmente simple para pruebas del CRUD. Si luego quieres endurecerlo para producción real, hay que reemplazarlo por autenticacion real y secretos fuera del código.
