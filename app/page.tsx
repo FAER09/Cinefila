@@ -1,27 +1,13 @@
-import { HomeScreen } from "@/components/cinefila/HomeScreen";
 import { LocalHomeScreen } from "@/components/cinefila/LocalHomeScreen";
 import { SiteHeader } from "@/components/cinefila/SiteHeader";
-import { isLocalMode } from "@/lib/data-mode";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  if (isLocalMode()) {
-    return (
-      <main className="min-h-screen pb-16">
-        <SiteHeader />
-        <LocalHomeScreen />
-      </main>
-    );
-  }
-
-  const { getCatalog } = await import("@/lib/movies");
-  const movies = await getCatalog();
-
   return (
     <main className="min-h-screen pb-16">
       <SiteHeader />
-      <HomeScreen movies={movies} />
+      <LocalHomeScreen />
     </main>
   );
 }
