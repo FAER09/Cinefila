@@ -16,6 +16,7 @@ export function AdminDashboardLocal() {
   const [editFormState, setEditFormState] = useState<FormState>(initialFormState);
   const [createFormKey, setCreateFormKey] = useState(0);
   const [query, setQuery] = useState("");
+  const [openMovieId, setOpenMovieId] = useState<number | null>(null);
 
   const filteredMovies = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -45,6 +46,11 @@ export function AdminDashboardLocal() {
     const result = await updateMovie(new FormData(event.currentTarget));
     setEditFormState(result);
     setCreateFormState(initialFormState);
+
+    if (result.status === "success") {
+      setOpenMovieId(null);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   const handleDelete = async (event: FormEvent<HTMLFormElement>) => {
@@ -52,6 +58,11 @@ export function AdminDashboardLocal() {
     const result = await deleteMovie(new FormData(event.currentTarget));
     setEditFormState(result);
     setCreateFormState(initialFormState);
+
+    if (result.status === "success") {
+      setOpenMovieId(null);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   return (
@@ -200,6 +211,14 @@ export function AdminDashboardLocal() {
           {filteredMovies.map((movie) => (
             <details
               key={movie.id}
+              open={openMovieId === movie.id}
+              onToggle={(event) => {
+                if ((event.target as HTMLDetailsElement).open) {
+                  setOpenMovieId(movie.id);
+                } else if (openMovieId === movie.id) {
+                  setOpenMovieId(null);
+                }
+              }}
               className="overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-[var(--panel)]"
             >
               <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 px-5 py-4">
