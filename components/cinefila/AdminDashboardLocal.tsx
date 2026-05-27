@@ -12,7 +12,8 @@ import { useLocalCatalog } from "@/lib/local-catalog";
 
 export function AdminDashboardLocal() {
   const { movies, createMovie, updateMovie, deleteMovie } = useLocalCatalog();
-  const [formState, setFormState] = useState<FormState>(initialFormState);
+  const [createFormState, setCreateFormState] = useState<FormState>(initialFormState);
+  const [editFormState, setEditFormState] = useState<FormState>(initialFormState);
   const [createFormKey, setCreateFormKey] = useState(0);
   const [query, setQuery] = useState("");
 
@@ -30,7 +31,8 @@ export function AdminDashboardLocal() {
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const result = await createMovie(new FormData(event.currentTarget));
-    setFormState(result);
+    setCreateFormState(result);
+    setEditFormState(initialFormState);
 
     if (result.status === "success") {
       event.currentTarget.reset();
@@ -41,13 +43,15 @@ export function AdminDashboardLocal() {
   const handleUpdate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const result = await updateMovie(new FormData(event.currentTarget));
-    setFormState(result);
+    setEditFormState(result);
+    setCreateFormState(initialFormState);
   };
 
   const handleDelete = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const result = await deleteMovie(new FormData(event.currentTarget));
-    setFormState(result);
+    setEditFormState(result);
+    setCreateFormState(initialFormState);
   };
 
   return (
@@ -147,11 +151,11 @@ export function AdminDashboardLocal() {
             </label>
           </div>
 
-          {formState.message ? (
+          {createFormState.message ? (
             <p
-              className={`text-sm ${formState.status === "error" ? "text-red-300" : "text-[var(--muted)]"}`}
+              className={`text-sm ${createFormState.status === "error" ? "text-red-300" : "text-[var(--muted)]"}`}
             >
-              {formState.message}
+              {createFormState.message}
             </p>
           ) : null}
 
@@ -169,6 +173,18 @@ export function AdminDashboardLocal() {
             <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
               Edita cada pelicula inline. Los cambios se reflejan en Inicio y Explorar.
             </p>
+
+            {editFormState.message ? (
+              <p
+                className={`mt-4 rounded-2xl border px-4 py-2 text-sm ${
+                  editFormState.status === "error"
+                    ? "border-red-400/20 bg-red-400/10 text-red-100"
+                    : "border-[var(--accent)]/20 bg-[var(--accent)]/10 text-[var(--accent)]"
+                }`}
+              >
+                {editFormState.message}
+              </p>
+            ) : null}
             <label className="mt-4 block space-y-2 text-sm text-[var(--muted)]">
               <span>Buscar pelicula</span>
               <input
