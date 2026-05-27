@@ -4,7 +4,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { createReview } from "@/app/actions";
 import { StarRatingInput } from "@/components/cinefila/StarRatingInput";
 import { StarRatingDisplay } from "@/components/cinefila/StarRatingDisplay";
 import type { CatalogMovie, CatalogReview } from "@/lib/catalog";
@@ -14,7 +13,7 @@ import { initialFormState } from "@/lib/form-state";
 type MovieModalProps = {
   movie: CatalogMovie | null;
   onClose: () => void;
-  onCreateReview?: CreateReviewHandler;
+  onCreateReview: CreateReviewHandler;
 };
 
 type ReviewInput = Omit<CatalogReview, "id" | "createdAt">;
@@ -53,83 +52,7 @@ function readNumber(formData: FormData, key: string) {
   return Number.isFinite(value) ? value : NaN;
 }
 
-function ServerReviewForm({ movieId }: { movieId: number }) {
-  const [state, setState] = useState<FormState>(initialFormState);
-  const [pending, setPending] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
-  const [resetKey, setResetKey] = useState(0);
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (pending) {
-      return;
-    }
-
-    setPending(true);
-    const result = await createReview(initialFormState, new FormData(event.currentTarget));
-    setState(result);
-
-    if (result.status === "success") {
-      event.currentTarget.reset();
-      setResetKey((value) => value + 1);
-    }
-
-    setPending(false);
-  };
-
-  return (
-    <form
-      ref={formRef}
-      onSubmit={handleSubmit}
-      className="space-y-4 rounded-[1.75rem] border border-[var(--border)] bg-black/25 p-5"
-    >
-      <input type="hidden" name="movieId" value={movieId} />
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="space-y-2 text-sm text-[var(--muted)]">
-          <span>Nombre</span>
-          <input
-            type="text"
-            name="author"
-            required
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none placeholder:text-white/25 focus:border-[var(--accent)]"
-            placeholder="Tu nombre"
-          />
-        </label>
-
-        <label className="space-y-2 text-sm text-[var(--muted)]">
-          <span>Calificacion</span>
-          <StarRatingInput key={`server-rating-${resetKey}`} name="rating" defaultValue={5} />
-        </label>
-      </div>
-
-      <label className="space-y-2 text-sm text-[var(--muted)]">
-        <span>Reseña</span>
-        <textarea
-          name="body"
-          required
-          rows={4}
-          className="w-full rounded-3xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none placeholder:text-white/25 focus:border-[var(--accent)]"
-          placeholder="Que te parecio la pelicula"
-        />
-      </label>
-
-      <div className="flex items-center justify-between gap-3">
-        <p className={`text-sm ${state.status === "error" ? "text-red-300" : "text-[var(--muted)]"}`}>
-          {pending ? "Publicando..." : state.message}
-        </p>
-        <button
-          type="submit"
-          className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-medium text-black hover:bg-[var(--accent-strong)]"
-        >
-          Publicar reseña
-        </button>
-      </div>
-    </form>
-  );
-}
-
-function LocalReviewForm({
+function ReviewForm({
   movieId,
   onCreateReview,
 }: {
@@ -215,20 +138,6 @@ function LocalReviewForm({
       </div>
     </form>
   );
-}
-
-function ReviewForm({
-  movieId,
-  onCreateReview,
-}: {
-  movieId: number;
-  onCreateReview?: CreateReviewHandler;
-}) {
-  if (onCreateReview) {
-    return <LocalReviewForm movieId={movieId} onCreateReview={onCreateReview} />;
-  }
-
-  return <ServerReviewForm movieId={movieId} />;
 }
 
 export function MovieModal({ movie, onClose, onCreateReview }: MovieModalProps) {
